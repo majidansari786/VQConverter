@@ -18,7 +18,7 @@ A simple and efficient command-line tool to convert videos into multiple resolut
 ## 📸 Demo
 
 ```bash
-$ python converter.py
+$ python main.py
 Enter Video address: sample.mp4
 Enter video name: output
 Enter Number Which Quality To convert: 
