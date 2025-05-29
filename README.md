@@ -1,4 +1,4 @@
-# 🎞️ Video Resolution Converter (Python + FFmpeg)
+# 🎞️ VQConverter (Python + FFmpeg)
 
 A simple and efficient command-line tool to convert videos into multiple resolutions (480p, 720p, 1080p) using Python and FFmpeg.
 
@@ -21,7 +21,8 @@ A simple and efficient command-line tool to convert videos into multiple resolut
 $ python main.py
 Enter Video address: sample.mp4
 Enter video name: output
-Enter Number Which Quality To convert: 
+Enter Number Which Quality To convert:
+ 0 for Gpu mode
  1 for 480 
  2 for 720 
  3 for 1080 
