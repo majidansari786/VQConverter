@@ -1,5 +1,20 @@
 import os
 import subprocess
+import boto3
+from botocore.client import Config
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# DigitalOcean Spaces Setup.
+session = boto3.session.Session()
+client = session.client('s3',
+                        region_name=os.getenv("DO_REGION_NAME"),
+                        endpoint_url=os.getenv("DO_ENDPOINT_URL"),
+                        aws_access_key_id=os.getenv("DO_KEY_ID"),
+                        aws_secret_access_key=os.getenv("DO_SECRET_ID")
+                        )
+
 def quality():
     input_video = input('Enter Video address:')
     output_name = input("Enter video name:")
@@ -25,8 +40,13 @@ def quality():
                               universal_newlines=True);
                 size_480 = os.path.getsize(file_480)
                 print("\n" + "="*50)
+                print("✅ Wait File being uploading to server!")
+                client.upload_file(f'{file_480}', 'your_space_name', f'upload/{file_480}')
+                client.put_object_acl(ACL='public-read',Bucket='your_space_name',Key=f'upload/{file_480}')
                 print("✅ Conversion Successful!")
                 print(f"Generated Files: \n{file_480}: {size_480/(1024*1024):.2f} MB")
+                print(f'Generated File link: https://your_space_name.blr1.digitaloceanspaces.com/upload/{file_480}')
+                os.remove(file_480)
                 print("="*50)
             elif choice == 2:
                 subprocess.run(command_720p_gpu,check=True, 
@@ -34,8 +54,13 @@ def quality():
                               universal_newlines=True);
                 size_720 = os.path.getsize(file_720)
                 print("\n" + "="*50)
+                print("✅ Wait File being uploading to server!")
+                client.upload_file(f'{file_720}', 'your_space_name', f'upload/{file_720}')
+                client.put_object_acl(ACL='public-read',Bucket='your_space_name',Key=f'upload/{file_720}')
                 print("✅ Conversion Successful!")
                 print(f"Generated Files: \n{file_720}: {size_720/(1024*1024):.2f} MB")
+                print(f'Generated File link: https://your_space_name.blr1.digitaloceanspaces.com/upload/{file_720}')
+                os.remove(file_720)
                 print("="*50)
             elif choice == 3:
                 subprocess.run(command_1080p_gpu,check=True, 
@@ -44,7 +69,11 @@ def quality():
                 size_1080 = os.path.getsize(file_1080)
                 print("\n" + "="*50)
                 print("✅ Conversion Successful!")
+                print("✅ Wait File being uploading to server!")
+                client.upload_file(f'{file_1080}', 'your_space_name', f'upload/{file_1080}')
+                client.put_object_acl(ACL='public-read',Bucket='your_space_name',Key=f'upload/{file_1080}')
                 print(f"Generated Files: \n{file_1080}: {size_1080/(1024*1024):.2f} MB")
+                print(f'Generated File link: https://your_space_name.blr1.digitaloceanspaces.com/upload/{file_1080}')
                 print("="*50)
         elif selected_quality == 1:
             subprocess.run(command_480p,check=True, 
@@ -53,7 +82,11 @@ def quality():
             size_480 = os.path.getsize(file_480)
             print("\n" + "="*50)
             print("✅ Conversion Successful!")
+            print("✅ Wait File being uploading to server!")
+            client.upload_file(f'{file_480}', 'your_space_name', f'upload/{file_480}')
+            client.put_object_acl(ACL='public-read',Bucket='your_space_name',Key=f'upload/{file_480}')
             print(f"Generated Files: \n{file_480}: {size_480/(1024*1024):.2f} MB")
+            print(f'Generated File link: https://your_space_name.blr1.digitaloceanspaces.com/upload/{file_480}')
             print("="*50)
         elif selected_quality == 2:
             subprocess.run(command_720p,check=True, 
@@ -62,7 +95,11 @@ def quality():
             size_720 = os.path.getsize(file_720)
             print("\n" + "="*50)
             print("✅ Conversion Successful!")
+            print("✅ Wait File being uploading to server!")
+            client.upload_file(f'{file_720}', 'your_space_name', f'upload/{file_720}')
+            client.put_object_acl(ACL='public-read',Bucket='your_space_name',Key=f'upload/{file_720}')
             print(f"Generated Files: \n{file_720}: {size_720/(1024*1024):.2f} MB")
+            print(f'Generated File link: https://your_space_name.blr1.digitaloceanspaces.com/upload/{file_720}')
             print("="*50)
         elif selected_quality == 3:
             subprocess.run(command_1080p,check=True, 
@@ -71,33 +108,24 @@ def quality():
             size_1080 = os.path.getsize(file_1080)
             print("\n" + "="*50)
             print("✅ Conversion Successful!")
+            print("✅ Wait File being uploading to server!")
+            client.upload_file(f'{file_1080}', 'your_space_name', f'upload/{file_1080}')
+            client.put_object_acl(ACL='public-read',Bucket='your_space_name',Key=f'upload/{file_1080}')
             print(f"Generated Files: \n{file_1080}: {size_1080/(1024*1024):.2f} MB")
+            print(f'Generated File link: https://your_space_name.blr1.digitaloceanspaces.com/upload/{file_1080}')
             print("="*50)
         elif selected_quality == 4:
-            subprocess.run(command_480p,check=True, 
-                              stderr=subprocess.PIPE, 
-                              universal_newlines=True);
-            subprocess.run(command_720p,check=True, 
-                              stderr=subprocess.PIPE, 
-                              universal_newlines=True);
-            subprocess.run(command_1080p,check=True, 
-                              stderr=subprocess.PIPE, 
-                              universal_newlines=True);
-            size_480 = os.path.getsize(file_480)
-            size_720 = os.path.getsize(file_720)
-            size_1080 = os.path.getsize(file_1080)
-            print("\n" + "="*50)
-            print("✅ Conversion Successful in 3 Qualities!")
-            print(f"Generated Files: \n{file_480}: {size_480/(1024*1024):.2f} MB, \n{file_720}: {size_720/(1024*1024):.2f} MB,\n{file_1080}: {size_1080/(1024*1024):.2f} MB")
-            print("="*50)
-        elif selected_quality == 5:
             subprocess.run(command_compress,check=True,
                            stderr=subprocess.PIPE,
                            universal_newlines=True)
             size_compress = os.path.getsize(file_compress)
             print("\n" + "="*50)
             print("✅ Compression Successful!")
+            print("✅ Wait File being uploading to server!")
+            client.upload_file(f'{file_compress}', 'your_space_name', f'upload/{file_compress}')
+            client.put_object_acl(ACL='public-read',Bucket='your_space_name',Key=f'upload/{file_compress}')
             print(f"Generated Files: \n{file_compress}: {size_compress/(1024*1024):.2f} MB")
+            print(f'Generated File link: https://your_space_name.blr1.digitaloceanspaces.com/upload/{file_compress}')
             print("="*50)
     except subprocess.CalledProcessError as e:
         print("\n" + "="*50)
