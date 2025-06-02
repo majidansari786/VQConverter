@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VQConverter - Video Encoder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8">
+    <h2 class="text-3xl font-bold text-center text-indigo-600 mb-6">🎬 VQConverter - Video Encoder Tool</h2>
+    <p class="text-center text-gray-600 mb-6">Use  1-2 min duration video file for Testing .</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="space-y-2 mb-4">
+          {% for category, message in messages %}
+            <div class="p-3 rounded-lg text-sm {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+              {{ message|safe }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data" class="space-y-5">
+      <div>
+        <label class="block font-medium">🎥 Upload Input Video:</label>
+        <input type="file" name="input_video" accept="video/*" class="w-full mt-1 p-2 border rounded-lg bg-white" required>
+      </div>
+
+      <div>
+        <label class="block font-medium">📁 Output File Name:</label>
+        <input type="text" name="output_name" class="w-full mt-1 p-2 border rounded-lg" placeholder="e.g. my_output" required>
+      </div>
+
+      <div>
+        <label class="block font-medium">⚙️ Select Mode:</label>
+        <select name="selected_mode" id="selected_mode" class="w-full mt-1 p-2 border rounded-lg" onchange="handleModeChange()">
+          <option value="1">Encode 480p</option>
+          <option value="2">Encode 720p</option>
+          <option value="3">Encode 1080p</option>
+          <option value="0">GPU Encode</option>
+          <option value="4">Compress with H.265</option>
+          <option value="5">Burn Subtitle</option>
+        </select>
+      </div>
+
+      <!-- GPU Resolution -->
+      <div id="gpu_resolutions" style="display: none;">
+        <label class="block font-medium">📏 Select GPU Resolution:</label>
+        <select name="gpu_resolution" class="w-full mt-1 p-2 border rounded-lg">
+          <option value="480">480p</option>
+          <option value="720">720p</option>
+          <option value="1080">1080p</option>
+        </select>
+      </div>
+
+      <!-- Subtitle Upload -->
+      <div id="subtitle_upload" style="display: none;">
+        <label class="block font-medium">📄 Upload Subtitle (.srt):</label>
+        <input type="file" name="subtitle_file" accept=".srt" class="w-full mt-1 p-2 border rounded-lg bg-white">
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+          🚀 Start Encoding
+        </button>
+        <br>
+        <br>
+        <span>Made by 💗 Using FFMPEG and PYTHON by Majid Ansari</span>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function handleModeChange() {
+      const mode = document.getElementById('selected_mode').value;
+      const gpuRes = document.getElementById('gpu_resolutions');
+      const subUpload = document.getElementById('subtitle_upload');
+
+      gpuRes.style.display = mode === '0' ? 'block' : 'none';
+      subUpload.style.display = mode === '5' ? 'block' : 'none';
+    }
+
+    // Initial setup
+    window.onload = handleModeChange;
+  </script>
+</body>
+</html>
