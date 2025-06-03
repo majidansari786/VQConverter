@@ -5,6 +5,7 @@ import subprocess
 import boto3
 from botocore.client import Config
 from dotenv import load_dotenv
+from asgiref.wsgi import WsgiToAsgi
 
 load_dotenv()
 
@@ -12,7 +13,7 @@ app = Flask(__name__)
 app.secret_key = 'avnasjdnavnajs'
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
+asgi_app = WsgiToAsgi(app)
 
 # DigitalOcean Spaces Setup.
 session = boto3.session.Session()
