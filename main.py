@@ -30,12 +30,41 @@ if not BUCKET_NAME:
 def encode(input_video,output_name,subtitle_file,selected_quality,quality,scale,crf,bv,maxrate,bufsize):
     file_compress = f'{output_name}_compress.mp4'
     
-    command = f'ffmpeg -i {input_video} -vf "scale=-2:{scale}" -c:v libx264 -crf 23 -preset fast -c:a copy {quality}'
-    command_gpu = f'ffmpeg -i "{input_video}" -vf "scale=640:480" -c:v h264_nvenc -b:v {bv}k -maxrate {maxrate}k -bufsize {bufsize}k -c:a aac -b:a 128k "{quality}"'
-    command_compress = f'ffmpeg -i {input_video} -vcodec libx265 -crf 30 -preset fast -tag:v hvc1 -acodec aac -b:a 128k {file_compress}'
+    command = [
+        "ffmpeg", "-i", input_video,
+        "-vf", f"scale=-2:{scale}",
+        "-c:v", "libx264", "-crf", "23",
+        "-preset", "fast", "-c:a", "copy",
+        quality
+    ]
+    
+    command_gpu = [
+        "ffmpeg", "-i", input_video,
+        "-vf", "scale=640:480",
+        "-c:v", "h264_nvenc",
+        "-b:v", f"{bv}k",
+        "-maxrate", f"{maxrate}k",
+        "-bufsize", f"{bufsize}k",
+        "-c:a", "aac", "-b:a", "128k",
+        quality
+    ]
+    
+    command_compress = [
+        "ffmpeg", "-i", input_video,
+        "-vcodec", "libx265", "-crf", "30",
+        "-preset", "fast", "-tag:v", "hvc1",
+        "-acodec", "aac", "-b:a", "128k",
+        file_compress
+    ]
+    
     escaped_subtitle = subtitle_file.replace('\\', '/').replace(':', '\\:') if subtitle_file else ""
-    command_burn = f'ffmpeg -i "{input_video}" -vf "subtitles=\'{escaped_subtitle}\'" -c:v libx264 -crf 23 -preset fast -c:a aac -b:a 128k "{quality}"'
-
+    command_burn = [
+        "ffmpeg", "-i", input_video,
+        "-vf", f"subtitles='{escaped_subtitle}'",
+        "-c:v", "libx264", "-crf", "23",
+        "-preset", "fast", "-c:a", "aac", "-b:a", "128k",
+        quality
+    ]
     try:
         if selected_quality == 0: 
             subprocess.run(command_gpu,check=True, 
