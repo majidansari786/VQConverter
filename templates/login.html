@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-950 text-white">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - VQConverter</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- AOS (Optional for animations) -->
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
+  <style>
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-950 text-white font-sans">
+
+  <form method="post" class="glass w-full max-w-md p-8 rounded-2xl shadow-xl space-y-6" data-aos="zoom-in">
+    <h2 class="text-3xl font-bold text-center text-blue-400">Login to VQConverter</h2>
+
+    <div>
+      <label for="username" class="block text-sm mb-1">Username</label>
+      <input type="text" id="username" name="username" placeholder="Enter your username"
+             class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    </div>
+
+    <div>
+      <label for="password" class="block text-sm mb-1">Password</label>
+      <input type="password" id="password" name="password" placeholder="Enter your password"
+             class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    </div>
+
+    <button type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg text-lg font-semibold shadow-md transition hover:scale-105">
+      Submit
+    </button>
+
+    <div class="text-center text-sm text-gray-400">
+      Don’t have an account?
+      <a href="{{ url_for('register') }}" class="text-blue-500 hover:underline">Register here</a>
+    </div>
+  </form>
+
+  <script>
+    AOS.init({
+      duration: 1000,
+      once: true
+    });
+  </script>
+</body>
+</html>

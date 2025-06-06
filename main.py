@@ -1,5 +1,8 @@
 import os
-from flask import Flask,render_template,flash,redirect,request
+from flask import Flask,render_template,flash,redirect,request,url_for
+from flask_login import login_manager,UserMixin,login_user,login_required,LoginManager,current_user,logout_user
+from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 from markupsafe import Markup
 import subprocess
 import boto3
@@ -14,7 +17,30 @@ app.secret_key = 'avnasjdnavnajs'
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 asgi_app = WsgiToAsgi(app)
+bcrypt = Bcrypt(app)
 
+
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+@login_manager.user_loader
+
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+
+with app.app_context():
+    db.create_all()
 # DigitalOcean Spaces Setup.
 session = boto3.session.Session()
 client = session.client('s3',
@@ -118,8 +144,14 @@ def encode(input_video,output_name,subtitle_file,selected_quality,quality,scale,
         flash("\nError: FFmpeg not found. Please install FFmpeg first.",'danger')
     except Exception as e:
         flash(f"\nUnexpected error: {str(e)}",'danger')
-@app.route("/", methods=['GET', 'POST'])
+
+@app.route('/')
 def index():
+    return render_template('/index.html')
+
+@app.route("/dashboard", methods=['GET', 'POST'])
+@login_required
+def dashboard():
     if request.method == 'POST':
         video_file = request.files.get('input_video')
         if not video_file:
@@ -171,7 +203,49 @@ def index():
             pass
 
             return redirect('/')
-    return render_template('/index.html')
+    return render_template('/dashboard.html')
+
+@app.route('/register',methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash('Username already exists', 'danger')
+            return redirect('/register')
+        new_user = User(username=username, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('/register.html')
+
+@app.route('/login',methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        if user and bcrypt.check_password_hash(user.password, password):
+            login_user(user)
+            flash('Login Successfully', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Incorrect Username or password', 'danger')
+            return redirect(url_for('login'))
+    return render_template('/login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash("Logged out successfully", "success")
+    return redirect(url_for('login'))
 
 @app.route('/contact')
 def contact():
