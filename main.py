@@ -27,8 +27,6 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -38,6 +36,12 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+
+class encode_history(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(100), nullable=False)
+    created_by = db.Column(db.String(100), db.ForeignKey('user.username'), nullable=False)
+    date_created = db.Column(db.DateTime, server_default=db.func.now())
 
 with app.app_context():
     db.create_all()
@@ -103,7 +107,10 @@ def encode(input_video,output_name,subtitle_file,selected_quality,quality,scale,
             file_link = f'https://{BUCKET_NAME}.blr1.digitaloceanspaces.com/upload/{file_basename}'
             flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="{file_link}" target="_blank">Download File</a>'), 'success')
             os.remove(quality)
-            
+            file_history = encode_history(filename=file_basename, created_by=current_user.username, date_created=db.func.now())
+            db.session.add(file_history)
+            db.session.commit()
+
         elif selected_quality == 4:
             subprocess.run(command_compress,check=True,
                         stderr=subprocess.PIPE,
@@ -115,6 +122,10 @@ def encode(input_video,output_name,subtitle_file,selected_quality,quality,scale,
             file_link = f'https://{BUCKET_NAME}.blr1.digitaloceanspaces.com/upload/{file_basename}'
             flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="{file_link}" target="_blank">Download File</a>'), 'success')
             os.remove(file_compress)
+            file_history = encode_history(filename=file_basename, created_by=current_user.username, date_created=db.func.now())
+            db.session.add(file_history)
+            db.session.commit()
+            
         elif selected_quality == 5:
             subprocess.run(command_burn,check=True, 
                             stderr=subprocess.PIPE, 
@@ -126,6 +137,10 @@ def encode(input_video,output_name,subtitle_file,selected_quality,quality,scale,
             file_link = f'https://{BUCKET_NAME}.blr1.digitaloceanspaces.com/upload/{file_basename}'
             flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="{file_link}" target="_blank">Download File</a>'), 'success')
             os.remove(quality)
+            file_history = encode_history(filename=file_basename, created_by=current_user.username, date_created=db.func.now())
+            db.session.add(file_history)
+            db.session.commit()
+            
         else:
             subprocess.run(command,check=True, 
                             stderr=subprocess.PIPE, 
@@ -137,6 +152,9 @@ def encode(input_video,output_name,subtitle_file,selected_quality,quality,scale,
             file_link = f'https://{BUCKET_NAME}.blr1.digitaloceanspaces.com/upload/{file_basename}'
             flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="{file_link}" target="_blank">Download File</a>'), 'success')
             os.remove(quality)
+            file_history = encode_history(filename=file_basename, created_by=current_user.username, date_created=db.func.now())
+            db.session.add(file_history)
+            db.session.commit()
                 
     except subprocess.CalledProcessError as e:
         flash('❌ Conversion Failed!', 'danger')
@@ -202,7 +220,7 @@ def dashboard():
         except:
             pass
 
-            return redirect('/')
+            return redirect(url_for('dashboard'))
     return render_template('/dashboard.html')
 
 @app.route('/register',methods=['GET', 'POST'])
@@ -250,6 +268,16 @@ def logout():
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
+
+@app.route('/about')
+def about():
+    return render_template('/about.html')
+
+@app.route('/history')
+@login_required
+def history():
+    encodes = encode_history.query.filter_by(created_by=current_user.username).all()
+    return render_template('/history.html', encodes=encodes,BUCKET_NAME=BUCKET_NAME)
 
 if __name__ == '__main__':
     app.run(debug=True)
