@@ -105,7 +105,8 @@ def encode(input_video,output_name,subtitle_file,selected_quality,quality,scale,
             client.upload_file(f'{quality}', BUCKET_NAME, f'upload/{file_basename}')
             client.put_object_acl(ACL='public-read',Bucket=BUCKET_NAME,Key=f'upload/{file_basename}')
             file_link = f'https://{BUCKET_NAME}.blr1.digitaloceanspaces.com/upload/{file_basename}'
-            flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="{file_link}" target="_blank">Download File</a>'), 'success')
+            flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="{file_link}" target="_blank">Download</a>'), 'success')
+            flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="/watch/{file_basename}" target="_blank">Watch Now</a>'), 'success')
             os.remove(quality)
             file_history = encode_history(filename=file_basename, created_by=current_user.username, date_created=db.func.now())
             db.session.add(file_history)
@@ -121,6 +122,7 @@ def encode(input_video,output_name,subtitle_file,selected_quality,quality,scale,
             client.put_object_acl(ACL='public-read',Bucket=BUCKET_NAME,Key=f'upload/{file_basename}')
             file_link = f'https://{BUCKET_NAME}.blr1.digitaloceanspaces.com/upload/{file_basename}'
             flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="{file_link}" target="_blank">Download File</a>'), 'success')
+            flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="/watch/{file_basename}" target="_blank">Watch Now</a>'), 'success')
             os.remove(file_compress)
             file_history = encode_history(filename=file_basename, created_by=current_user.username, date_created=db.func.now())
             db.session.add(file_history)
@@ -136,6 +138,7 @@ def encode(input_video,output_name,subtitle_file,selected_quality,quality,scale,
             client.put_object_acl(ACL='public-read',Bucket=BUCKET_NAME,Key=f'upload/{file_basename}')
             file_link = f'https://{BUCKET_NAME}.blr1.digitaloceanspaces.com/upload/{file_basename}'
             flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="{file_link}" target="_blank">Download File</a>'), 'success')
+            flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="/watch/{file_basename}" target="_blank">Watch Now</a>'), 'success')
             os.remove(quality)
             file_history = encode_history(filename=file_basename, created_by=current_user.username, date_created=db.func.now())
             db.session.add(file_history)
@@ -151,6 +154,7 @@ def encode(input_video,output_name,subtitle_file,selected_quality,quality,scale,
             client.put_object_acl(ACL='public-read',Bucket=BUCKET_NAME,Key=f'upload/{file_basename}')
             file_link = f'https://{BUCKET_NAME}.blr1.digitaloceanspaces.com/upload/{file_basename}'
             flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="{file_link}" target="_blank">Download File</a>'), 'success')
+            flash(Markup(f'✅ <strong>Success!</strong> <a class="underline text-blue-600" href="/watch/{file_basename}" target="_blank">Watch Now</a>'), 'success')
             os.remove(quality)
             file_history = encode_history(filename=file_basename, created_by=current_user.username, date_created=db.func.now())
             db.session.add(file_history)
@@ -272,6 +276,12 @@ def contact():
 @app.route('/about')
 def about():
     return render_template('/about.html')
+
+@app.route('/watch/<filename>')
+@login_required
+def watch(filename):
+    file_link = f"https://{BUCKET_NAME}.blr1.digitaloceanspaces.com/upload/{filename}"
+    return render_template('watch.html',file_link = file_link)
 
 @app.route('/history')
 @login_required
